@@ -1,4 +1,11 @@
+import { IsOptional, IsString, Min } from "class-validator";
+
 export class FilterProductDTO {
-  search: string;
-  category: string;
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @IsOptional()
+  @IsString()
+  category?: string;
 }
