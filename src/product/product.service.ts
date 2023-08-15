@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -43,8 +43,13 @@ export class ProductService {
   }
 
   async addProduct(createProductDTO: CreateProductDto): Promise<Product> {
-    const newProduct = await this.productModel.create(createProductDTO);
+    try {
+      const newProduct = await this.productModel.create(createProductDTO);
     return newProduct.save();
+    } catch (error) {
+      this.handleException(error)
+    }
+    
   }
 
   async updateProduct(id: string, createProductDTO: CreateProductDto): Promise<Product> {
@@ -55,5 +60,13 @@ export class ProductService {
   async deleteProduct(id: string): Promise<any> {
     const deletedProduct = await this.productModel.findByIdAndRemove(id);
     return deletedProduct;
+  }
+
+  private handleException(error: any) {
+    if (error.code === 11000) {
+      throw new BadRequestException(`Product already exists. ${JSON.stringify(error.keyValue)}`);
+    }
+    console.log(error)
+    throw new InternalServerErrorException(`Can't create product - check server logs`)
   }
 }
