@@ -20,10 +20,11 @@ export class ProductService {
 
     if (search) {
       products = products.filter(product => 
-        product.name.includes(search) ||
-        product.description.includes(search)
+        product.name && product.name.includes(search) ||
+        product.description && product.description.includes(search)
       );
     }
+    
 
     if (category) {
       products = products.filter(product => product.category === category)
