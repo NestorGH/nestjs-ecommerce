@@ -1,10 +1,11 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { SchemaTypes, Document } from "mongoose";
-import { Product } from "src/product/entities/product.entity";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, SchemaTypes } from 'mongoose';
+
+export type ItemDocument = Item & Document;
 
 @Schema()
-export class Item extends Document {
-  @Prop({ type: SchemaTypes.ObjectId, ref: Product.name }) //TODO: Add ref to 'Product'
+export class Item {
+  @Prop({ type: SchemaTypes.ObjectId, ref: 'Product' })
   productId: string;
 
   @Prop()

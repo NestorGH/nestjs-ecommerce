@@ -1,11 +1,12 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { SchemaTypes } from "mongoose";
-import { Item } from "./item.entity";
-import { User } from "src/user/entities/user.entity";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, SchemaTypes } from 'mongoose';
+import { Item } from './item.entity';
+
+export type CartDocument = Cart & Document;
 
 @Schema()
 export class Cart {
-  @Prop({ type: SchemaTypes.ObjectId, ref: User.name }) //TODO: Add ref to 'User'
+  @Prop({ type: SchemaTypes.ObjectId, ref: 'User' })
   userId: string;
 
   @Prop()
