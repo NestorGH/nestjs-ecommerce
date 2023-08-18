@@ -1,34 +1,44 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Request, Param, Delete, UseGuards, NotFoundException } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/auth/enums/role.enum';
+import { ItemDTO } from './dto/item.dto';
+
 
 @Controller('cart')
 export class CartController {
-  constructor(private readonly cartService: CartService) {}
+  constructor(private cartService: CartService) { }
 
-  @Post()
-  create(@Body() createCartDto: CreateCartDto) {
-    return this.cartService.create(createCartDto);
+  // we used @UseGuards and @Roles decorators for the three methods
+  // A customer must be logged in and must have a user role assigned to add or remove products
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.User)
+  @Post('/')
+  async addItemToCart(@Request() req, @Body() itemDTO: ItemDTO) {
+    const userId = req.user.userId;
+    const cart = await this.cartService.addItemToCart(userId, itemDTO);
+    return cart;
   }
 
-  @Get()
-  findAll() {
-    return this.cartService.findAll();
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.User)
+  @Delete('/')
+  async removeItemFromCart(@Request() req, @Body() { productId }) {
+    const userId = req.user.userId;
+    const cart = await this.cartService.removeItemFromCart(userId, productId);
+    if (!cart) throw new NotFoundException('Item does not exist');
+    return cart;
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cartService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
-    return this.cartService.update(+id, updateCartDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cartService.remove(+id);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.User)
+  @Delete('/:id')
+  async deleteCart(@Param('id') userId: string) {
+    const cart = await this.cartService.deleteCart(userId);
+    if (!cart) throw new NotFoundException('Cart does not exist');
+    return cart;
   }
 }

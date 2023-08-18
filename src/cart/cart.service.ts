@@ -28,6 +28,7 @@ export class CartService {
     return deletedCart;
   }
 
+  // recalculating the cart total when an item is added or removed, or when an item’s quantity is changed
   private recalculateCart(cart: CartDocument) {
     cart.totalPrice = 0;
     cart.items.forEach(item => {
@@ -41,8 +42,14 @@ export class CartService {
 
     const cart = await this.getCart(userId);
 
+    
+    // If the cart doesn’t exist, we need to create a new one.
     if (cart) {
       const itemIndex = cart.items.findIndex((item) => item.productId == productId);
+
+      //The product exists, so we need to update its quantity and subtotal price
+      // The product doesn’t exist, so we need to add it
+      // Either way, we need to run the recalculateCart() method to update the cart appropriately
 
       if (itemIndex > -1) {
         let item = cart.items[itemIndex];
@@ -65,11 +72,13 @@ export class CartService {
 
   async removeItemFromCart(userId: string, productId: string): Promise<any> {
     const cart = await this.getCart(userId);
-
+  
     const itemIndex = cart.items.findIndex((item) => item.productId == productId);
-
+  
+    // we run recalculateCart() to update the cart correctly after an item is removed.
     if (itemIndex > -1) {
       cart.items.splice(itemIndex, 1);
+      this.recalculateCart(cart);
       return cart.save();
     }
   }
