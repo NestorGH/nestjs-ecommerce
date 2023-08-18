@@ -7,7 +7,7 @@ import { Cart, CartDocument } from './entities/cart.entity';
 
 @Injectable()
 export class CartService {
-  constructor(@InjectModel('Cart') private readonly cartModel: Model<CartDocument>) { }
+  constructor(@InjectModel(Cart.name) private readonly cartModel: Model<CartDocument>) { }
 
   async createCart(userId: string, itemDTO: ItemDTO, subTotalPrice: number, totalPrice: number): Promise<Cart> {
     const newCart = await this.cartModel.create({
